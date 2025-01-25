@@ -9,10 +9,11 @@ An advanced work-in-progress password generation tool that currently features op
 1. Improve interface
 2. Password strength meter
 3. Improve password history management
-4. Password encryption
+4. Password encryption and add a better data storage
 5. Advance password generation customization options
 6. Add multi-language support
 7. Improve QOL
+8. An option to autofill passwords in websites
 
 ## For any question dm StivoMix on discord
 ## **Have Fun!!!**
