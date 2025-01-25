@@ -16,4 +16,3 @@ An advanced work-in-progress password generation tool that currently features op
 8. An option to autofill passwords in websites
 
 ## For any question dm StivoMix on discord
-## **Have Fun!!!**
