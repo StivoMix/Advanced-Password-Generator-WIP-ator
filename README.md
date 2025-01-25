@@ -7,13 +7,12 @@ An advanced work-in-progress password generation tool that currently features op
 
 # To be added list
 1. Improve interface
-2. Improve error handling
-3. Password strength meter
-4. Improve password history management
-5. Password encryption
-6. Advance password generation customization options
-7. Add multi-language support
-8. Improve QOL
+2. Password strength meter
+3. Improve password history management
+4. Password encryption
+5. Advance password generation customization options
+6. Add multi-language support
+7. Improve QOL
 
 ## For any question dm StivoMix on discord
 ## **Have Fun!!!**
