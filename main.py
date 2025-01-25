@@ -1,4 +1,4 @@
-import random # stuff to do: add swift error handling to pass history management
+import random 
 import os
 import logo
 from pystyle import Colors, Write
@@ -24,7 +24,7 @@ def main():
         elif choice == "3":
             clear(creditss)
         else:
-            Write.Print("Invalid choice. Please try again.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid choice. Please try again.\n", Colors.blue_to_purple, interval = 0.025)
             choice = Write.Input("Enter your choice: ", Colors.blue_to_purple, interval = 0.025)
 
 def generate_password():
@@ -39,9 +39,9 @@ def generate_password():
             if 3 <= length <= 50:
                 break
             else:
-                Write.Print("Invalid length. Password length should be between 3 and 50 characters.", Colors.blue_to_purple, interval = 0.025)
+                Write.Print("Invalid length. Password length should be between 3 and 50 characters.\n", Colors.blue_to_purple, interval = 0.025)
         except ValueError:
-            Write.Print("Invalid input. Please enter a valid integer.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid input. Please enter a valid integer.\n", Colors.blue_to_purple, interval = 0.025)
 
     lowerchars = Write.Input("Include lower case characters? (y/n): ", Colors.blue_to_purple, interval = 0.025)
     while True:
@@ -51,7 +51,7 @@ def generate_password():
             lower_chars = ""
             break
         else:
-            Write.Print("Invalid input Please enter 'y' or 'n'.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid input. Please enter 'y' or 'n'.\n", Colors.blue_to_purple, interval = 0.025)
             lowerchars = Write.Input("Include lower case characters? (y/n): ", Colors.blue_to_purple, interval = 0.025)
 
     upperchars = Write.Input("Include upper case characters? (y/n): ", Colors.blue_to_purple, interval = 0.025)
@@ -62,7 +62,7 @@ def generate_password():
             upper_chars = ""
             break
         else:
-            Write.Print("Invalid input. Please enter 'y' or 'n'.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid input. Please enter 'y' or 'n'.\n", Colors.blue_to_purple, interval = 0.025)
             upperchars = Write.Input("Include upper case characters? (y/n): ", Colors.blue_to_purple, interval = 0.025)
 
     nums = Write.Input("Include numbers? (y/n): ", Colors.blue_to_purple, interval = 0.025)
@@ -73,7 +73,7 @@ def generate_password():
             numbers = ""
             break
         else:
-            Write.Print("Invalid input. Please enter 'y' or 'n'.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid input. Please enter 'y' or 'n'.\n", Colors.blue_to_purple, interval = 0.025)
             nums = Write.Input("Include numbers? (y/n): ", Colors.blue_to_purple, interval = 0.025)
 
     special_char = Write.Input("Include special characters? (y/n): ", Colors.blue_to_purple, interval = 0.025)
@@ -84,7 +84,7 @@ def generate_password():
             special_chars = ""
             break
         else:
-            Write.Print("Invalid input. Please enter 'y' or 'n'.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid input. Please enter 'y' or 'n'.\n", Colors.blue_to_purple, interval = 0.025)
             special_char = Write.Input("Include special characters? (y/n): ", Colors.blue_to_purple, interval = 0.025)
 
     password = random.choices(lower_chars + upper_chars + numbers + special_chars, k=length)
@@ -98,7 +98,8 @@ def generate_password():
         elif save.lower() == "n":
             break
         else:
-            Write.Print("Invalid input. Please enter 'y' or 'n'.", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid input. Please enter 'y' or 'n'.\n", Colors.blue_to_purple, interval = 0.025)
+            save = Write.Input("Save password? (y/n): ", Colors.blue_to_purple, interval = 0.025)
     clear(main)
 
 def save_password(password):
@@ -109,7 +110,7 @@ def save_password(password):
         with open(filename, "a") as f:
             f.write(f"Password: {password} | Note: {note}\n")
         Write.Print("Password and note saved successfully.\n", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
         clear(main)
     except Exception as e:
         Write.Print(f"An error occurred while saving the password: {e}", Colors.blue_to_purple, interval = 0.025)
@@ -152,8 +153,8 @@ def manage_password_history():
             clear(main)
             break
         else:
-            Write.Print("Invalid choice. Please try again.", Colors.blue_to_purple, interval = 0.025)
-            choice1 = Write.Input("\nEnter your choice: ", Colors.blue_to_purple, interval = 0.025)
+            Write.Print("Invalid choice. Please try again.\n", Colors.blue_to_purple, interval = 0.025)
+            choice1 = Write.Input("Enter your choice: ", Colors.blue_to_purple, interval = 0.025)
 
 def view_passwords():
     filename = "passwords.txt"
@@ -168,14 +169,14 @@ def view_passwords():
                 Write.Print("\nSaved Passwords:", Colors.blue_to_purple, interval = 0.025)
                 for i, line in enumerate(content, start=1):
                     Write.Print(f"\n{i}. {line.strip()}", Colors.blue_to_purple, interval = 0.0025)
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
     clear(manage_password_history)
 
 def edit_password():
     filename = "passwords.txt"
     if not os.path.exists(filename):
         Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
         clear(manage_password_history)
         return
 
@@ -194,14 +195,14 @@ def edit_password():
             Write.Print("Invalid number. Please try again.", Colors.blue_to_purple, interval = 0.025)
     except (ValueError, IndexError):
         Write.Print("Invalid input. Please try again.", Colors.blue_to_purple, interval = 0.025)
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
     clear(manage_password_history)
 
 def delete_password():
     filename = "passwords.txt"
     if not os.path.exists(filename):
         Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
         clear(manage_password_history)
         return
 
@@ -218,14 +219,14 @@ def delete_password():
             Write.Print("Invalid number. Please try again.", Colors.blue_to_purple, interval = 0.025)
     except (ValueError, IndexError):
         Write.Print("Invalid input. Please try again.", Colors.blue_to_purple, interval = 0.025)
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
     clear(manage_password_history)
 
 def edit_note():
     filename = "passwords.txt"
     if not os.path.exists(filename):
         Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
         clear(manage_password_history)
         return
 
@@ -244,14 +245,14 @@ def edit_note():
             Write.Print("Invalid number. Please try again.", Colors.blue_to_purple, interval = 0.025)
     except (ValueError, IndexError):
         Write.Print("Invalid input. Please try again.", Colors.blue_to_purple, interval = 0.025)
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
     clear(manage_password_history)
 
 def delete_note():
     filename = "passwords.txt"
     if not os.path.exists(filename):
         Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress Enter to return to the menu.")
+        Write.Input("\nPress any key to return.")
         clear(manage_password_history)
         return
 
@@ -269,14 +270,14 @@ def delete_note():
             Write.Print("Invalid number. Please try again.", Colors.blue_to_purple, interval = 0.025)
     except (ValueError, IndexError):
         Write.Print("Invalid input. Please try again.", Colors.blue_to_purple, interval = 0.025)
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
     clear(manage_password_history)
 
 def delete_all():
     filename = "passwords.txt"
     if not os.path.exists(filename):
         Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval=0.025)
-        Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval=0.025)
+        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
         clear(manage_password_history)
         return
 
@@ -293,7 +294,7 @@ def delete_all():
         else:
             Write.Print("Invalid input. Try again.\n", Colors.blue_to_purple, interval=0.025)
 
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval=0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def creditss():
@@ -303,7 +304,7 @@ def creditss():
     Discord: StivoMix
     GitHub: https://github.com/StivoMix
     """, Colors.blue_to_purple, interval = 0.025)
-    Write.Input("\nPress Enter to return to the menu.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
     clear(main)
 
 clear(main)
