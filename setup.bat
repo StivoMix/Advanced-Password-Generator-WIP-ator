@@ -32,12 +32,22 @@ IF %ERRORLEVEL% NEQ 0 (
     echo pip is up to date.
 )
 
-echo Installing required packages...
+echo Installing pystyle...
 python -m pip install pystyle >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Failed to install the required package: pystyle.
     echo Please check your internet connection or try running:
     echo python -m pip install pystyle
+    pause
+    exit /b 1
+)
+
+echo Installing cryptography...
+python -m pip install cryptography >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Failed to install the required package: cryptography.
+    echo Please check your internet connection or try running:
+    echo python -m pip install cryptography
     pause
     exit /b 1
 )
