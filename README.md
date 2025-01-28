@@ -1,4 +1,4 @@
-# Password Machine v1.0
+# Password Machine v1.1
 An advanced work-in-progress password generation tool that currently features options such as: customized generation options, more or less user friendly interface (will be improved in the future),
 
 # Setup Tutorial
@@ -9,10 +9,8 @@ An advanced work-in-progress password generation tool that currently features op
 1. Improve interface
 2. Password strength meter
 3. Improve password history management
-4. Password encryption and add a better data storage
-5. Advance password generation customization options
-6. Add multi-language support
-7. Improve QOL
-8. An option to autofill passwords in websites
+4. Advance password generation customization options
+5. Improve QOL
+6. An option to autofill passwords in websites
 
 ## For any question dm StivoMix on discord
