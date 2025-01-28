@@ -2,6 +2,23 @@ import random
 import os
 import logo
 from pystyle import Colors, Write
+from cryptography.fernet import Fernet
+
+try:
+    if not os.path.exists("key.key"):
+        Write.Print("Encryption key not found. Generating a new key...\n", Colors.blue_to_purple, interval=0.025)
+        with open("key.key", "wb") as key_file:
+            key = Fernet.generate_key()
+            key_file.write(key)
+            Write.Print("Encryption key successfully generated and saved as 'key.key'.\n", Colors.green, interval=0.025)
+    else:
+        with open("key.key", "rb") as key_file:
+            key = key_file.read()
+    cipher_suite = Fernet(key)
+except Exception as e:
+    Write.Print(f"An error occurred during key handling: {str(e)}\n", Colors.red, interval=0.025)
+    Write.Input("Press Enter to exit...", Colors.red, interval=0.025)
+    exit()
 
 def clear(next_function=None, *args):
     os.system('cls' if os.name == 'nt' else 'clear') 
@@ -10,7 +27,7 @@ def clear(next_function=None, *args):
         next_function(*args)  
 
 def main():
-    options = {1: "Generate Password", 2: "Manage Password History", 3: "Credits"}
+    options = {1: "Generate Password", 2: "Manage Password History", 3: "Credits and Update logs"}
     Write.Print("Choose an option:", Colors.blue_to_purple, interval = 0.025)
     for key, value in options.items():
         Write.Print(f"\n{key}. {value}", Colors.blue_to_purple, interval = 0.0025)
@@ -104,16 +121,17 @@ def generate_password():
 
 def save_password(password):
     filename = "passwords.txt"
-    note = Write.Input("Enter your note (Leave blank for none): ", Colors.blue_to_purple, interval = 0.025).strip() or "None"
+    note = Write.Input("Enter your note (Leave blank for none): ", Colors.blue_to_purple, interval=0.025).strip() or "None"
 
     try:
+        encrypted_password = cipher_suite.encrypt(password.encode()).decode()
         with open(filename, "a") as f:
-            f.write(f"Password: {password} | Note: {note}\n")
-        Write.Print("Password and note saved successfully.\n", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
+            f.write(f"Password: {encrypted_password} | Note: {note}\n")
+        Write.Print("Password and note saved successfully.\n", Colors.blue_to_purple, interval=0.025)
+        Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
         clear(main)
     except Exception as e:
-        Write.Print(f"An error occurred while saving the password: {e}", Colors.blue_to_purple, interval = 0.025)
+        Write.Print(f"An error occurred while saving the password: {e}\n", Colors.blue_to_purple, interval=0.025)
 
 def manage_password_history():
     options1 = {
@@ -159,17 +177,23 @@ def manage_password_history():
 def view_passwords():
     filename = "passwords.txt"
     if not os.path.exists(filename):
-        Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval = 0.025)
+        Write.Print("No passwords saved yet.\n", Colors.blue_to_purple, interval=0.025)
     else:
         with open(filename, "r") as f:
             content = f.readlines()
             if not content:
-                Write.Print("Password history is empty.", Colors.blue_to_purple, interval = 0.025)
+                Write.Print("Password history is empty.\n", Colors.blue_to_purple, interval=0.025)
             else:
-                Write.Print("\nSaved Passwords:", Colors.blue_to_purple, interval = 0.025)
+                Write.Print("\nSaved Passwords:", Colors.blue_to_purple, interval=0.025)
                 for i, line in enumerate(content, start=1):
-                    Write.Print(f"\n{i}. {line.strip()}", Colors.blue_to_purple, interval = 0.0025)
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
+                    try:
+                        encrypted_password = line.split(" | ")[0].split(": ")[1]
+                        decrypted_password = cipher_suite.decrypt(encrypted_password.encode()).decode()
+                        note = line.split(" | ")[1]
+                        Write.Print(f"\n{i}. Password: {decrypted_password} | {note.strip()}", Colors.blue_to_purple, interval=0.0025)
+                    except Exception as e:
+                        Write.Print(f"\n{i}. Error decrypting password: {e}", Colors.red, interval=0.0025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def edit_password(filename="passwords.txt"):
@@ -179,28 +203,35 @@ def edit_password(filename="passwords.txt"):
             with open(filename, "r") as f:
                 lines = f.readlines()
             if 0 <= index < len(lines):
-                Write.Print(f"Current password #{index + 1}: {lines[index].strip()}\n", Colors.blue_to_purple, interval=0.025)
+                line_parts = lines[index].strip().split(" | ")
+                encrypted_password = line_parts[0].split(": ")[1]
+                note = line_parts[1].replace("Note: ", "") if len(line_parts) > 1 else "None"
+
+                decrypted_password = cipher_suite.decrypt(encrypted_password.encode()).decode()
+                Write.Print(f"Current password #{index + 1}: {decrypted_password}\n", Colors.blue_to_purple, interval=0.025)
+
                 new_password = Write.Input("Enter the new password: ", Colors.blue_to_purple, interval=0.025)
                 while True:
                     confirm = Write.Input(f"Are you sure you want to replace password #{index + 1} with '{new_password}'? (y/n): ", Colors.blue_to_purple, interval=0.025)
                     if confirm.lower() == "y":
-                        lines[index] = new_password + "\n"
+                        encrypted_new_password = cipher_suite.encrypt(new_password.encode()).decode()
+                        lines[index] = f"Password: {encrypted_new_password} | Note: {note}\n"
                         with open(filename, "w") as f:
                             f.writelines(lines)
-                        Write.Print("Password updated successfully.", Colors.blue_to_purple, interval=0.025)
+                        Write.Print("Password updated successfully.\n", Colors.blue_to_purple, interval=0.025)
                         break
                     elif confirm.lower() == "n":
-                        Write.Print("Operation canceled.", Colors.blue_to_purple, interval=0.025)
+                        Write.Print("Operation canceled.\n", Colors.blue_to_purple, interval=0.025)
                         break
                     else:
                         Write.Print("Invalid choice. Please try again.\n", Colors.blue_to_purple, interval=0.025)
-                break 
+                break
             else:
                 Write.Print("Invalid number. Please enter a valid index.\n", Colors.blue_to_purple, interval=0.025)
         except ValueError:
             Write.Print("Invalid input. Please enter a valid number.\n", Colors.blue_to_purple, interval=0.025)
 
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def delete_password(filename="passwords.txt"):
@@ -210,6 +241,12 @@ def delete_password(filename="passwords.txt"):
             with open(filename, "r") as f:
                 lines = f.readlines()
             if 0 <= index < len(lines):
+                line_parts = lines[index].strip().split(" | ")
+                encrypted_password = line_parts[0].split(": ")[1]
+
+                decrypted_password = cipher_suite.decrypt(encrypted_password.encode()).decode()
+                Write.Print(f"Current password #{index + 1}: {decrypted_password}\n", Colors.blue_to_purple, interval=0.025)
+                
                 while True:
                     confirm = Write.Input(f"Are you sure you want to delete password #{index + 1}? (y/n): ", Colors.blue_to_purple, interval=0.025)
                     if confirm.lower() == "y":
@@ -229,7 +266,7 @@ def delete_password(filename="passwords.txt"):
         except ValueError:
             Write.Print("Invalid input. Please enter a valid number.\n", Colors.blue_to_purple, interval=0.025)
 
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def edit_note(filename="passwords.txt"):
@@ -239,18 +276,23 @@ def edit_note(filename="passwords.txt"):
             with open(filename, "r") as f:
                 lines = f.readlines()
             if 0 <= index < len(lines):
-                Write.Print(f"Current note #{index + 1}: {lines[index].strip()}\n", Colors.blue_to_purple, interval=0.025)
+                line_parts = lines[index].strip().split(" | ")
+                note = line_parts[1].split(": ")[1]
+                password = line_parts[0].split(": ")[1]
+
+                Write.Print(f"Current note #{index + 1}: {note}\n", Colors.blue_to_purple, interval=0.025)
+
                 new_note = Write.Input("Enter the new note: ", Colors.blue_to_purple, interval=0.025)
                 while True:
                     confirm = Write.Input(f"Are you sure you want to replace note #{index + 1} with '{new_note}'? (y/n): ", Colors.blue_to_purple, interval=0.025)
                     if confirm.lower() == "y":
-                        lines[index] = new_note + "\n"
+                        lines[index] = (f"Password: {password} | Note: {new_note}\n")
                         with open(filename, "w") as f:
                             f.writelines(lines)
-                        Write.Print("Note updated successfully.", Colors.blue_to_purple, interval=0.025)
+                        Write.Print("Note updated successfully.\n", Colors.blue_to_purple, interval=0.025)
                         break
                     elif confirm.lower() == "n":
-                        Write.Print("Operation canceled.", Colors.blue_to_purple, interval=0.025)
+                        Write.Print("Operation canceled.\n", Colors.blue_to_purple, interval=0.025)
                         break
                     else:
                         Write.Print("Invalid choice. Please try again.\n", Colors.blue_to_purple, interval=0.025)
@@ -260,7 +302,7 @@ def edit_note(filename="passwords.txt"):
         except ValueError:
             Write.Print("Invalid input. Please enter a valid number.\n", Colors.blue_to_purple, interval=0.025)
 
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def delete_note(filename="passwords.txt"):
@@ -270,10 +312,20 @@ def delete_note(filename="passwords.txt"):
             with open(filename, "r") as f:
                 lines = f.readlines()
             if 0 <= index < len(lines):
+                line_parts = lines[index].strip().split(" | ")
+                note = line_parts[1].split(": ")[1]
+                password = line_parts[0].split(": ")[1]
+
+                if note == "None":
+                    Write.Print("No note to delete.", Colors.blue_to_purple, interval=0.025)
+                    break
+
+                Write.Print(f"Current note #{index + 1}: {note}\n", Colors.blue_to_purple, interval=0.025)
+                
                 while True:
                     confirm = Write.Input(f"Are you sure you want to delete note #{index + 1}? (y/n): ", Colors.blue_to_purple, interval=0.025)
                     if confirm.lower() == "y":
-                        del lines[index]
+                        lines[index] = (f"Password: {password} | Note: None\n")
                         with open(filename, "w") as f:
                             f.writelines(lines)
                         Write.Print("Note deleted successfully.", Colors.blue_to_purple, interval=0.025)
@@ -289,7 +341,7 @@ def delete_note(filename="passwords.txt"):
         except ValueError:
             Write.Print("Invalid input. Please enter a valid number.\n", Colors.blue_to_purple, interval=0.025)
 
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def delete_all(filename = "passwords.txt"):
@@ -306,24 +358,28 @@ def delete_all(filename = "passwords.txt"):
         else:
             Write.Print("Invalid input. Try again.\n", Colors.blue_to_purple, interval=0.025)
 
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval=0.025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
     clear(manage_password_history)
 
 def creditss():
     Write.Print("""
-    Password Machine v1.0
+    Password Machine v1.1
     Developed by: StivoMix
     Discord: StivoMix
     GitHub: https://github.com/StivoMix
+
+    Update Logs:
+    1.0 - Release
+    1.1 - Added password encryption
     """, Colors.blue_to_purple, interval = 0.025)
-    Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
+    Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval = 0.025)
     clear(main)
 
 def check_file(next_function=None, *args):
     filename = "passwords.txt"
     if not os.path.exists(filename):
         Write.Print("No passwords saved yet.", Colors.blue_to_purple, interval = 0.025)
-        Write.Input("\nPress any key to return.", Colors.blue_to_purple, interval = 0.025)
+        Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval = 0.025)
         clear(manage_password_history)
         return
     if next_function:
