@@ -27,7 +27,7 @@ def clear(next_function=None, *args):
         next_function(*args)  
 
 def main():
-    options = {1: "Generate Password", 2: "Manage Password History", 3: "Credits and Update logs"}
+    options = {1: "Generate Password", 2: "Manage Password History", 3: "Credits and Update logs", 4: "Change Encryption key"}
     Write.Print("Choose an option:", Colors.blue_to_purple, interval = 0.025)
     for key, value in options.items():
         Write.Print(f"\n{key}. {value}", Colors.blue_to_purple, interval = 0.0025)
@@ -40,6 +40,8 @@ def main():
             clear(manage_password_history)
         elif choice == "3":
             clear(creditss)
+        elif choice == "4":
+            clear(rek)
         else:
             Write.Print("Invalid choice. Please try again.\n", Colors.blue_to_purple, interval = 0.025)
             choice = Write.Input("Enter your choice: ", Colors.blue_to_purple, interval = 0.025)
@@ -384,5 +386,59 @@ def check_file(next_function=None, *args):
         return
     if next_function:
         next_function(*args)  
+
+def rek():
+    if not os.path.exists("key.key"):
+        Write.Print("Encryption key not found. Generating a new key...\n", Colors.blue_to_purple, interval=0.025)
+        with open("key.key", "wb") as kf:
+            key = Fernet.generate_key()
+            kf.write(key)
+            Write.Print("Encryption key successfully generated and saved as 'key.key'.\n", Colors.green, interval=0.025)
+            Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
+            clear(main)
+    else:
+        try:
+            with open("key.key", "rb") as kf:
+                old_key = kf.read()
+            old_cipher = Fernet(old_key)
+
+            with open("passwords.txt", "r") as pf:
+                lines = pf.readlines()
+            
+            decrypted_passwords = []
+            for line in lines:
+                line_parts = line.strip().split(" | ")
+                if len(line_parts) < 2:
+                    Write.Print("Invalid password format detected. Skipping line.\n", Colors.red, interval=0.025)
+                    continue
+                
+                note = line_parts[1].split(": ")[1]
+                encrypted_password = line_parts[0].split(": ")[1] 
+                
+                try:
+                    decrypted_password = old_cipher.decrypt(encrypted_password.encode()).decode()
+                    decrypted_passwords.append((decrypted_password, note)) 
+                except Exception as e:
+                    Write.Print(f"Error decrypting password: {str(e)}\n", Colors.red, interval=0.025)
+
+            new_key = Fernet.generate_key()
+            with open("key.key", "wb") as kf:
+                kf.write(new_key)
+            new_cipher = Fernet(new_key)
+            global cipher_suite
+            cipher_suite = new_cipher
+
+            with open("passwords.txt", "w") as pf:
+                for password, note in decrypted_passwords:
+                    new_encrypted_password = new_cipher.encrypt(password.encode()).decode()
+                    pf.write(f"Password: {new_encrypted_password} | Note: {note}\n")
+
+            Write.Print("Encryption key regenerated and passwords re-encrypted successfully.\n", Colors.green, interval=0.025)
+        
+        except Exception as e:
+            Write.Print(f"An error occurred while regenerating the key: {str(e)}\n", Colors.red, interval=0.025)
+        
+        Write.Input("\nPress enter to return.", Colors.blue_to_purple, interval=0.025)
+        clear(main)
 
 clear(main)
